@@ -1,6 +1,19 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import knex from "knex";
 
-export default (req, res) => {
-  res.statusCode = 200
-  res.json({ name: 'John Doe' })
-}
+const db = knex({
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1',
+    user: 'postgres',
+    password: '26042000',
+    database : 'ybs'
+    }
+    });
+
+// Try to catch node shutting down and explicitly close
+// connection to database
+
+
+export { db };
+
+

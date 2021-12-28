@@ -1,65 +1,115 @@
-import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import { Form, FormGroup, Label, Input, Button } from 'reactstrap'
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { db } from './api/hello'
+import { setCookies } from 'cookies-next'
 
-export default function Home() {
+  /* post request that sends username and password on body*/
+
+
+
+  const deneme = async () => {
+    console.log('deneme')
+  }
+
+
+export default function Home({ job, company }) {
+  /* create 2 states named username and password*/
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [token, setToken] = useState('')
+
+  const router = useRouter()
+
+  const login = async (username, password) => {
+    console.log(username, password)
+    const response = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    })
+    const json = await response.json();
+    setToken(json.token)
+
+    if (json.token === 'admin') {
+      router.push('/adm')
+      setCookies('token', json.token)
+    }
+    else if (json.token) {
+      router.push('/customer')
+      setCookies('token', json.token)
+    }
+  }
+
+  console.log(job, company)
+
   return (
+
     <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
+      <h1 className='text-center'>CRM</h1>
+      <Form inline>
+        <FormGroup>
+          <Label
+            for="exampleEmail"
+            hidden
           >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
+            Username
+          </Label>
+          <Input
+            id="username"
+            name="username"
+            placeholder="Username"
+            type="username"
+            onChange={(event) => setUsername(event.target.value)}
+          />
+        </FormGroup>
+        {' '}
+        <FormGroup>
+          <Label
+            for="examplePassword"
+            hidden
           >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+            Password
+          </Label>
+          <Input
+            id="examplePassword"
+            name="password"
+            placeholder="Password"
+            type="password"
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </FormGroup>
+        {' '}
+          <Button onClick={() => login(username,password)} className='d-flex  m-auto justify-content-center'>
+            Submit
+          </Button>
+      </Form>
+    
     </div>
+    
   )
+}
+
+
+export async function getServerSideProps({ params, res }) {
+  const job = await db
+    .select("*")
+    .from("customer")
+    .where({ customerid: 1 })
+    .first();
+
+
+  const company = await db
+    .select("*")
+    .from("ticket")
+    .where({ ticketid: 1 })
+    .first();
+
+  return {
+    props: { job, company },
+  };
 }
