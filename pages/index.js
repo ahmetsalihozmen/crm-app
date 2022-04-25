@@ -10,12 +10,8 @@ import { setCookies } from 'cookies-next'
 
 
 
-  const deneme = async () => {
-    console.log('deneme')
-  }
 
-
-export default function Home({ job, company }) {
+export default function Home() {
   /* create 2 states named username and password*/
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -44,8 +40,6 @@ export default function Home({ job, company }) {
       setCookies('token', json.token)
     }
   }
-
-  console.log(job, company)
 
   return (
 
@@ -95,7 +89,7 @@ export default function Home({ job, company }) {
 }
 
 
-export async function getServerSideProps({ params, res }) {
+export async function getStaticProps ({ params, res }) {
   const job = await db
     .select("*")
     .from("customer")
@@ -103,13 +97,7 @@ export async function getServerSideProps({ params, res }) {
     .first();
 
 
-  const company = await db
-    .select("*")
-    .from("ticket")
-    .where({ ticketid: 1 })
-    .first();
-
   return {
-    props: { job, company },
+    props: { job },
   };
 }
